@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load store_extras humanize %}
+
+{% block title %}Your Cart — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="mb-8">
+        <p class="text-brand-600 font-black uppercase tracking-widest text-xs mb-1">Review & Checkout</p>
+        <h1 class="font-serif font-bold text-4xl text-epic-dark">Your Cart</h1>
+    </div>
+
+    {% if items %}
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Cart items -->
+        <div class="flex-1 min-w-0">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100" data-cart-table>
+                    {% for item in items %}
+                    <div class="flex items-start sm:items-center gap-4 p-5">
+                        <!-- Book cover -->
+                        <a href="{{ item.product.get_absolute_url }}" class="shrink-0 w-16 h-24 bg-gray-100 rounded-lg overflow-hidden book-shadow block" tabindex="-1">
+                            {% if item.product.display_image %}
+                                <img src="{{ item.product.display_image }}" alt="" class="w-full h-full object-cover">
+                            {% endif %}
+                        </a>
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-gray-900 leading-tight mb-0.5">
+                                <a href="{{ item.product.get_absolute_url }}" class="hover:text-brand-600 transition-colors">{{ item.product.name }}</a>
+                            </h3>
+                            <p class="text-sm text-gray-500 mb-3">{{ item.product.author }}</p>
+                            <!-- Qty + remove -->
+                            <div class="flex items-center gap-4 flex-wrap">
+                                <form method="post" action="{% url 'update_cart_item' item.pk %}" class="flex items-center border border-gray-300 rounded-lg overflow-hidden w-28" role="group" aria-label="Quantity for {{ item.product.name }}">
+                                    {% csrf_token %}
+                                    <button type="button" data-quantity-step="-1" aria-label="Decrease quantity" class="qty-btn rounded-none border-r border-gray-300 text-sm">−</button>
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="w-full text-center py-1.5 font-bold text-sm focus:outline-none border-none" onchange="this.form.submit()" aria-label="Quantity">
+                                    <button type="button" data-quantity-step="1" aria-label="Increase quantity" class="qty-btn rounded-none border-l border-gray-300 text-sm">+</button>
+                                </form>
+                                <form method="post" action="{% url 'remove_cart_item' item.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-xs font-bold text-gray-400 hover:text-red-600 uppercase tracking-wide transition-colors" aria-label="Remove {{ item.product.name }}">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Price -->
+                        <div class="text-right shrink-0">
+                            {% if item.product.is_on_sale %}
+                                <p class="font-black text-brand-600">{{ item.line_total|money }}</p>
+                                <p class="text-xs text-gray-400">{{ item.product.sale_price|money }} each</p>
+                            {% else %}
+                                <p class="font-black text-gray-900" data-line-total data-price="{{ item.product.effective_price }}">{{ item.line_total|money }}</p>
+                                <p class="text-xs text-gray-400">{{ item.product.price|money }} each</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mt-4 flex gap-3">
+                <a href="{% url 'home' %}" class="text-sm font-bold text-brand-600 hover:text-brand-800 flex items-center gap-1">← Continue Shopping</a>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="lg:w-80 shrink-0">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sticky top-24">
+                <h2 class="font-serif font-bold text-xl text-epic-dark mb-5">Order Summary</h2>
+                <div class="space-y-3 mb-5">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Subtotal ({{ item_count }} item{{ item_count|pluralize }})</span>
+                        <span class="font-bold text-gray-900">{{ subtotal|money }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Shipping</span>
+                        <span class="text-green-600 font-bold">Free</span>
+                    </div>
+                </div>
+                <div class="border-t border-gray-100 pt-4 mb-6 flex justify-between">
+                    <span class="font-black text-gray-900">Total</span>
+                    <span class="font-black text-2xl text-brand-600" data-cart-total>{{ subtotal|money }}</span>
+                </div>
+                <a href="{% url 'checkout' %}" class="block w-full text-center bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-wider px-6 py-4 rounded-xl transition-colors shadow-sm text-sm">
+                    Proceed to Checkout
+                </a>
+                <div class="mt-4 flex items-center justify-center gap-4 text-gray-400 text-xs">
+                    <span class="flex items-center gap-1">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        Secure checkout
+                    </span>
+                    <span class="flex items-center gap-1">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
+                        Free shipping
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty cart -->
+    <div class="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-16 text-center max-w-lg mx-auto mt-10">
+        <div class="flex justify-center mb-5" aria-hidden="true">
+            <svg class="w-20 h-20 text-gray-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h2>
+        <p class="text-gray-500 mb-7">Browse our curated selection of AI and ML books to find your next read.</p>
+        <a href="{% url 'home' %}" class="inline-block bg-epic-dark hover:bg-gray-800 text-white font-black uppercase tracking-wider px-8 py-4 rounded-xl transition-colors">
+            Browse Books
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

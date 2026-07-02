@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4 py-20 text-center">
+    <div>
+        <p class="text-8xl font-black text-gray-300 mb-4">500</p>
+        <h1 class="font-serif font-bold text-3xl text-epic-dark mb-3">Something went wrong</h1>
+        <p class="text-gray-500 mb-8 max-w-sm mx-auto">We're experiencing a technical issue. Our team has been notified. Please try again shortly.</p>
+        <a href="/" class="bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-wider px-8 py-3 rounded-xl transition-colors">Return Home</a>
+    </div>
+</div>
+{% endblock %}

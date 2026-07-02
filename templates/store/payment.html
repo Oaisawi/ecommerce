@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+{% load store_extras humanize static %}
+
+{% block title %}Payment — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+    <!-- Progress bar -->
+    <div class="flex items-center gap-2 mb-10 text-sm font-bold">
+        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-black">✓</span>
+        <span class="text-gray-400">Shipping</span>
+        <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+        <span class="bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-black">2</span>
+        <span class="text-gray-900">Payment</span>
+        <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+        <span class="bg-gray-200 text-gray-400 px-3 py-1 rounded-full text-xs font-black">3</span>
+        <span class="text-gray-400">Confirmation</span>
+    </div>
+
+    <!-- Demo banner -->
+    <div class="bg-yellow-50 border border-yellow-300 rounded-xl p-4 mb-8 flex items-start gap-3">
+        <span class="text-yellow-500 text-xl shrink-0 mt-0.5" aria-hidden="true">⚠</span>
+        <div>
+            <p class="font-bold text-yellow-900 text-sm">Demo Store — No real payment is taken</p>
+            <p class="text-yellow-800 text-xs mt-0.5">Use card <code class="bg-yellow-100 px-1.5 py-0.5 rounded font-mono font-bold">4242 4242 4242 4242</code> with any future expiry and any 3-digit CVC for a successful test payment.</p>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+            <span class="text-red-500 text-xl shrink-0" aria-hidden="true">✕</span>
+            <div>
+                <p class="font-bold text-red-800 text-sm">Payment Failed</p>
+                <p class="text-red-700 text-xs mt-0.5">{{ error }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Payment form -->
+        <div class="flex-1">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <!-- Tab headers -->
+                <div class="flex overflow-x-auto border-b border-gray-200 px-2" role="tablist" aria-label="Payment method">
+                    <button type="button" class="pay-tab active" data-pay-tab="card" role="tab" aria-selected="true" aria-controls="pay-card">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Card
+                    </button>
+                    <button type="button" class="pay-tab" data-pay-tab="apple_pay" role="tab" aria-selected="false" aria-controls="pay-apple_pay">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                        Apple Pay
+                    </button>
+                    <button type="button" class="pay-tab" data-pay-tab="google_pay" role="tab" aria-selected="false" aria-controls="pay-google_pay">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                        Google Pay
+                    </button>
+                    <button type="button" class="pay-tab" data-pay-tab="paypal" role="tab" aria-selected="false" aria-controls="pay-paypal">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="#003087" aria-hidden="true"><path d="M20.067 8.478c.492.315.844.825.983 1.39l.01.053c.093.432.1.88.017 1.315-.487 2.698-2.126 4.066-5.257 4.066h-.5c-.398 0-.739.286-.804.674l-.47 3.2-.13.883a.416.416 0 0 1-.412.355H10.69a.236.236 0 0 1-.234-.275l.528-3.347.003-.017.003-.015.617-3.909a.893.893 0 0 1 .882-.756h1.27c3.476 0 5.713-1.556 6.308-4.617zM8.717 4.5h4.94c2.386 0 4.002.73 4.77 2.147a4.79 4.79 0 0 1 .536 1.37l.006.028a5.72 5.72 0 0 1 .024.398c0 .135-.007.268-.022.4a5.016 5.016 0 0 1-2.065 3.355c-.907.614-2.04.915-3.357.915H12.5a.85.85 0 0 0-.84.715l-.67 4.252a.85.85 0 0 1-.84.715H6.97a.428.428 0 0 1-.424-.493L8.033 5.27A.85.85 0 0 1 8.717 4.5z"/></svg>
+                        PayPal
+                    </button>
+                    <button type="button" class="pay-tab" data-pay-tab="cod" role="tab" aria-selected="false" aria-controls="pay-cod">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                        Cash on Delivery
+                    </button>
+                </div>
+
+                <div class="p-6 sm:p-8">
+
+                    <!-- Card tab -->
+                    <div id="pay-card" class="pay-panel" role="tabpanel">
+                        <form method="post" id="card-form" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="card">
+                            <div class="space-y-5">
+                                <!-- Card number -->
+                                <div>
+                                    <label for="card_number" class="block text-sm font-bold text-gray-700 mb-1.5">Card Number *</label>
+                                    <div class="relative">
+                                        <input
+                                            type="text"
+                                            id="card_number"
+                                            name="card_number"
+                                            placeholder="0000 0000 0000 0000"
+                                            maxlength="19"
+                                            autocomplete="cc-number"
+                                            inputmode="numeric"
+                                            required
+                                            class="pay-input pr-16"
+                                            data-card-number
+                                        >
+                                        <span id="card-brand-icon" class="absolute right-3 top-1/2 -translate-y-1/2 text-xl font-black text-gray-300 select-none transition-all" aria-hidden="true" data-card-brand-icon></span>
+                                    </div>
+                                    <p id="card-number-error" class="text-red-600 text-xs mt-1 font-medium hidden" role="alert"></p>
+                                </div>
+                                <!-- Expiry + CVC -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="card_exp" class="block text-sm font-bold text-gray-700 mb-1.5">Expiry Date *</label>
+                                        <input
+                                            type="text"
+                                            id="card_exp"
+                                            name="card_exp"
+                                            placeholder="MM / YY"
+                                            maxlength="7"
+                                            autocomplete="cc-exp"
+                                            required
+                                            class="pay-input"
+                                            data-card-exp
+                                        >
+                                    </div>
+                                    <div>
+                                        <label for="card_cvc" class="block text-sm font-bold text-gray-700 mb-1.5">CVC *</label>
+                                        <div class="relative">
+                                            <input
+                                                type="text"
+                                                id="card_cvc"
+                                                name="card_cvc"
+                                                placeholder="123"
+                                                maxlength="4"
+                                                autocomplete="cc-csc"
+                                                inputmode="numeric"
+                                                required
+                                                class="pay-input"
+                                                data-card-cvc
+                                            >
+                                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 text-sm" aria-hidden="true">?</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Cardholder name -->
+                                <div>
+                                    <label for="card_name" class="block text-sm font-bold text-gray-700 mb-1.5">Cardholder Name *</label>
+                                    <input
+                                        type="text"
+                                        id="card_name"
+                                        name="card_name"
+                                        placeholder="As it appears on your card"
+                                        autocomplete="cc-name"
+                                        required
+                                        class="pay-input"
+                                    >
+                                </div>
+                            </div>
+                            <!-- Test card hints -->
+                            <details class="mt-5 text-xs text-gray-500">
+                                <summary class="cursor-pointer font-bold text-gray-600 hover:text-gray-900">Test card numbers</summary>
+                                <div class="mt-3 bg-gray-50 rounded-lg p-4 space-y-2 font-mono">
+                                    <div class="flex justify-between"><span>4242 4242 4242 4242</span><span class="text-green-600 font-sans font-bold">✓ Success</span></div>
+                                    <div class="flex justify-between"><span>4000 0000 0000 0002</span><span class="text-red-600 font-sans font-bold">✕ Declined</span></div>
+                                    <div class="flex justify-between"><span>4000 0000 0000 9995</span><span class="text-orange-600 font-sans font-bold">✕ Insufficient funds</span></div>
+                                    <p class="font-sans text-gray-400 mt-2 not-italic">Any future expiry · Any 3-digit CVC</p>
+                                </div>
+                            </details>
+                            <button type="submit" id="card-submit-btn" class="mt-6 w-full bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-wider px-6 py-4 rounded-xl transition-colors shadow-sm text-sm flex items-center justify-center gap-2">
+                                <span>Pay {{ total|money }}</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Apple Pay tab -->
+                    <div id="pay-apple_pay" class="pay-panel hidden" role="tabpanel">
+                        <form method="post" id="apple-pay-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="apple_pay">
+                            <input type="hidden" name="wallet_email" value="applepay@mock.test">
+                            <div class="text-center py-6">
+                                <div class="w-16 h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                    <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                                </div>
+                                <h3 class="font-bold text-gray-900 text-lg mb-1">Pay with Apple Pay</h3>
+                                <p class="text-gray-500 text-sm mb-6">Use Touch ID or Face ID to authorize the payment of <strong>{{ total|money }}</strong>.</p>
+                                <button type="button" id="apple-pay-btn" onclick="mockWalletPay('apple-pay-form', 'apple-pay-btn', 'Authenticating with Apple Pay…')" class="mx-auto flex items-center justify-center gap-2 bg-black text-white font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-gray-900 transition-colors">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                                    Pay {{ total|money }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Google Pay tab -->
+                    <div id="pay-google_pay" class="pay-panel hidden" role="tabpanel">
+                        <form method="post" id="google-pay-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="google_pay">
+                            <input type="hidden" name="wallet_email" value="googlepay@mock.test">
+                            <div class="text-center py-6">
+                                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg border border-gray-100">
+                                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                    </svg>
+                                </div>
+                                <h3 class="font-bold text-gray-900 text-lg mb-1">Pay with Google Pay</h3>
+                                <p class="text-gray-500 text-sm mb-6">Complete your purchase of <strong>{{ total|money }}</strong> with Google Pay.</p>
+                                <button type="button" id="google-pay-btn" onclick="mockWalletPay('google-pay-form', 'google-pay-btn', 'Connecting to Google Pay…')" class="mx-auto flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-800 font-bold px-8 py-4 rounded-xl shadow-sm hover:bg-gray-50 transition-colors">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                    </svg>
+                                    G Pay {{ total|money }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- PayPal tab -->
+                    <div id="pay-paypal" class="pay-panel hidden" role="tabpanel">
+                        <form method="post" id="paypal-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="paypal">
+                            <input type="hidden" name="wallet_email" value="sandbox@paypal.test">
+                            <div class="text-center py-6">
+                                <div class="w-16 h-16 bg-[#003087] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                                    <svg class="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.067 8.478c.492.315.844.825.983 1.39l.01.053c.093.432.1.88.017 1.315-.487 2.698-2.126 4.066-5.257 4.066h-.5c-.398 0-.739.286-.804.674l-.47 3.2-.13.883a.416.416 0 0 1-.412.355H10.69a.236.236 0 0 1-.234-.275l.528-3.347.003-.017.003-.015.617-3.909a.893.893 0 0 1 .882-.756h1.27c3.476 0 5.713-1.556 6.308-4.617zM8.717 4.5h4.94c2.386 0 4.002.73 4.77 2.147a4.79 4.79 0 0 1 .536 1.37l.006.028a5.72 5.72 0 0 1 .024.398c0 .135-.007.268-.022.4a5.016 5.016 0 0 1-2.065 3.355c-.907.614-2.04.915-3.357.915H12.5a.85.85 0 0 0-.84.715l-.67 4.252a.85.85 0 0 1-.84.715H6.97a.428.428 0 0 1-.424-.493L8.033 5.27A.85.85 0 0 1 8.717 4.5z"/></svg>
+                                </div>
+                                <h3 class="font-bold text-gray-900 text-lg mb-1">Pay with PayPal</h3>
+                                <p class="text-gray-500 text-sm mb-6">You'll be redirected to PayPal (sandbox) to complete your payment of <strong>{{ total|money }}</strong>.</p>
+                                <button type="button" id="paypal-btn" onclick="mockWalletPay('paypal-form', 'paypal-btn', 'Connecting to PayPal Sandbox…')" class="mx-auto flex items-center gap-2 bg-[#FFC439] hover:bg-yellow-400 text-[#003087] font-black px-8 py-4 rounded-xl shadow-sm transition-colors">
+                                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#003087" aria-hidden="true"><path d="M20.067 8.478c.492.315.844.825.983 1.39l.01.053c.093.432.1.88.017 1.315-.487 2.698-2.126 4.066-5.257 4.066h-.5c-.398 0-.739.286-.804.674l-.47 3.2-.13.883a.416.416 0 0 1-.412.355H10.69a.236.236 0 0 1-.234-.275l.528-3.347.003-.017.003-.015.617-3.909a.893.893 0 0 1 .882-.756h1.27c3.476 0 5.713-1.556 6.308-4.617zM8.717 4.5h4.94c2.386 0 4.002.73 4.77 2.147a4.79 4.79 0 0 1 .536 1.37l.006.028a5.72 5.72 0 0 1 .024.398c0 .135-.007.268-.022.4a5.016 5.016 0 0 1-2.065 3.355c-.907.614-2.04.915-3.357.915H12.5a.85.85 0 0 0-.84.715l-.67 4.252a.85.85 0 0 1-.84.715H6.97a.428.428 0 0 1-.424-.493L8.033 5.27A.85.85 0 0 1 8.717 4.5z"/></svg>
+                                    Pay with PayPal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- COD tab -->
+                    <div id="pay-cod" class="pay-panel hidden" role="tabpanel">
+                        <form method="post" id="cod-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_method" value="cod">
+                            <div class="py-4">
+                                <div class="bg-gray-50 rounded-xl p-6 border border-gray-100 mb-6 flex items-start gap-4">
+                                    <svg class="w-8 h-8 shrink-0 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                    <div>
+                                        <h3 class="font-bold text-gray-900 mb-1">Cash on Delivery</h3>
+                                        <p class="text-gray-600 text-sm leading-relaxed">Pay in cash when your order arrives. Our delivery partner will collect the payment of <strong>{{ total|money }}</strong> at your door.</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="cod-submit-btn"
+                                    onclick="mockWalletPay('cod-form','cod-submit-btn','Confirming your order…')"
+                                    class="w-full bg-epic-dark hover:bg-gray-800 text-white font-black uppercase tracking-wider px-6 py-4 rounded-xl transition-colors shadow-sm text-sm">
+                                    Place Order (Pay on Delivery)
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Order summary sidebar -->
+        <div class="lg:w-72 shrink-0">
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 sticky top-24">
+                <h2 class="font-serif font-bold text-lg text-epic-dark mb-4">Order Summary</h2>
+                <div class="space-y-3 mb-4 divide-y divide-gray-200">
+                    {% for item in items %}
+                        <div class="flex gap-3 pt-3 first:pt-0">
+                            {% if item.product.display_image %}
+                                <img src="{{ item.product.display_image }}" alt="" class="w-10 h-14 object-cover rounded-md shrink-0 bg-gray-200">
+                            {% else %}
+                                <div class="w-10 h-14 bg-gray-200 rounded-md shrink-0 flex items-center justify-center text-xs font-black text-gray-400">{{ item.product.name|slice:":2"|upper }}</div>
+                            {% endif %}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">{{ item.product.name }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Qty: {{ item.quantity }}</p>
+                            </div>
+                            <p class="text-sm font-bold text-gray-900 shrink-0">{{ item.line_total|money }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if discount %}
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-500">Subtotal</span>
+                        <span class="font-bold">{{ subtotal|money }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm mb-2 text-green-700">
+                        <span class="font-bold">Coupon discount</span>
+                        <span class="font-bold">−{{ discount|money }}</span>
+                    </div>
+                {% endif %}
+                <div class="border-t border-gray-300 pt-4 flex justify-between">
+                    <span class="font-black text-gray-900">Total</span>
+                    <span class="font-black text-2xl text-brand-600">{{ total|money }}</span>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200 space-y-2 text-xs text-gray-500">
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" class="shrink-0 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span class="font-medium">Ship to: {{ shipping.city }}, {{ shipping.country }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" class="shrink-0 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
+                        <span class="font-medium text-green-600">Free shipping included</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing modal -->
+<div id="processing-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden" role="dialog" aria-modal="true" aria-label="Processing payment">
+    <div class="bg-white rounded-2xl px-10 py-10 text-center max-w-xs w-full mx-4 shadow-2xl">
+        <div class="w-14 h-14 mx-auto mb-5">
+            <svg class="w-14 h-14 animate-spin text-brand-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-opacity="0.2"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <p id="processing-label" class="font-bold text-gray-900 text-lg mb-1">Processing…</p>
+        <p class="text-gray-400 text-sm">Please wait, do not close this page.</p>
+    </div>
+</div>
+
+<style>
+.pay-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #111827;
+    background-color: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    letter-spacing: 0.05em;
+}
+.pay-input:focus {
+    border-color: #e11d48;
+    box-shadow: 0 0 0 3px rgba(225,29,72,0.12);
+}
+.pay-input::placeholder {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: normal;
+    color: #9ca3af;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/payment.js' %}"></script>
+{% endblock %}

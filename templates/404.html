@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center px-4 py-20 text-center">
+    <div>
+        <p class="text-8xl font-black text-brand-600 mb-4">404</p>
+        <h1 class="font-serif font-bold text-3xl text-epic-dark mb-3">Page not found</h1>
+        <p class="text-gray-500 mb-8 max-w-sm mx-auto">The page you're looking for doesn't exist or may have been moved.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/" class="bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-wider px-8 py-3 rounded-xl transition-colors">Browse Books</a>
+            <a href="javascript:history.back()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-xl transition-colors">Go Back</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Categories - Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+    <div class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div>
+            <p class="text-brand-600 font-bold uppercase tracking-widest text-sm mb-2">Management</p>
+            <h1 class="text-4xl lg:text-5xl font-black text-epic-dark uppercase tracking-tight font-serif">Categories</h1>
+        </div>
+        <a href="{% url 'category_create' %}" class="bg-brand-600 text-white font-black tracking-widest uppercase text-sm px-6 py-3 rounded-sm hover:bg-brand-500 transition-colors shadow-sm shrink-0">
+            + Add Category
+        </a>
+    </div>
+
+    {% if categories %}
+    <div class="bg-white border-4 border-epic-dark shadow-[8px_8px_0px_rgba(15,23,42,1)] rounded-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 border-b-2 border-gray-200">
+                    <tr>
+                        <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest">Name</th>
+                        <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest">Slug</th>
+                        <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest text-center">Products</th>
+                        <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-2 divide-gray-100">
+                    {% for cat in categories %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-bold text-gray-900 text-lg">{{ cat.name }}</td>
+                        <td class="p-4">
+                            <code class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-sm">{{ cat.slug }}</code>
+                        </td>
+                        <td class="p-4 text-center font-bold text-brand-600 text-lg">
+                            {{ cat.product_count }}
+                        </td>
+                        <td class="p-4 text-right">
+                            <a href="{% url 'category_edit' cat.pk %}" class="inline-block border-2 border-gray-300 text-gray-700 font-bold tracking-widest uppercase text-xs px-4 py-2 rounded-sm hover:border-brand-500 hover:text-brand-600 transition-colors">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-gray-50 border-4 border-dashed border-gray-300 rounded-lg p-16 text-center max-w-2xl mx-auto mt-10">
+        <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <svg class="w-10 h-10 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900 uppercase tracking-tight mb-4">No Categories Found</h2>
+        <p class="text-lg text-gray-600 mb-8 font-medium">Create categories to organize your bookstore.</p>
+        <a href="{% url 'category_create' %}" class="inline-block bg-brand-600 text-white font-black tracking-widest uppercase px-8 py-4 rounded-sm hover:bg-brand-500 transition-colors shadow-lg">
+            Create First Category
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

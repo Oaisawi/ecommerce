@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Review Order - Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+    <div class="mb-10 text-center">
+        <p class="text-brand-600 font-bold uppercase tracking-widest text-sm mb-2">Almost There</p>
+        <h1 class="text-4xl lg:text-5xl font-black text-epic-dark uppercase tracking-tight font-serif mb-4">Review Your Order</h1>
+        <p class="text-xl text-gray-600 font-medium">Please confirm your order details before placing it.</p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-12">
+        <div class="lg:w-2/3 space-y-8">
+            <div class="bg-white p-8 border-4 border-epic-dark shadow-[8px_8px_0px_rgba(15,23,42,1)] rounded-sm">
+                <h2 class="text-2xl font-black text-epic-dark uppercase tracking-tight mb-6 font-serif border-b-2 border-gray-100 pb-4">Items</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 border-b-2 border-gray-200">
+                            <tr>
+                                <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest">Product</th>
+                                <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest text-center">Qty</th>
+                                <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest text-right">Price</th>
+                                <th class="p-4 text-sm font-black text-gray-900 uppercase tracking-widest text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y-2 divide-gray-100">
+                            {% for item in items %}
+                            <tr>
+                                <td class="p-4 font-bold text-gray-900">{{ item.product.name }}</td>
+                                <td class="p-4 text-center font-bold text-gray-700">{{ item.quantity }}</td>
+                                <td class="p-4 text-right text-gray-600">${{ item.product.price|intcomma }}</td>
+                                <td class="p-4 text-right font-black text-brand-600">${{ item.line_total|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-50 p-6 border-2 border-gray-200 rounded-sm">
+                    <h2 class="text-lg font-black text-epic-dark uppercase tracking-widest mb-4 border-b-2 border-gray-200 pb-2">Shipping Address</h2>
+                    {% if shipping %}
+                        <p class="text-gray-700 font-medium leading-relaxed">
+                            <strong class="text-gray-900">{{ shipping.full_name }}</strong><br>
+                            {{ shipping.street_address }}<br>
+                            {{ shipping.city }}, {{ shipping.state }} {{ shipping.postal_code }}<br>
+                            {{ shipping.country }}{% if shipping.phone %}<br>Tel: {{ shipping.phone }}{% endif %}
+                        </p>
+                    {% else %}
+                        <p class="text-brand-600 font-bold">No shipping address selected.</p>
+                    {% endif %}
+                </div>
+
+                <div class="bg-gray-50 p-6 border-2 border-gray-200 rounded-sm">
+                    <h2 class="text-lg font-black text-epic-dark uppercase tracking-widest mb-4 border-b-2 border-gray-200 pb-2">Billing Address</h2>
+                    {% if billing %}
+                        <p class="text-gray-700 font-medium leading-relaxed">
+                            <strong class="text-gray-900">{{ billing.full_name }}</strong><br>
+                            {{ billing.street_address }}<br>
+                            {{ billing.city }}, {{ billing.state }} {{ billing.postal_code }}<br>
+                            {{ billing.country }}
+                        </p>
+                    {% else %}
+                        <p class="text-gray-500 font-bold italic">Same as shipping address.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if notes %}
+            <div class="bg-brand-50 p-6 border-2 border-brand-200 rounded-sm">
+                <h2 class="text-lg font-black text-brand-900 uppercase tracking-widest mb-2">Order Notes</h2>
+                <p class="text-brand-800 font-medium">{{ notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="lg:w-1/3">
+            <div class="bg-brand-50 p-8 border-4 border-brand-200 rounded-sm sticky top-24">
+                <h2 class="text-2xl font-black text-epic-dark uppercase tracking-tight mb-6 font-serif">Order Total</h2>
+                
+                <div class="flex justify-between items-end border-b-4 border-epic-dark pb-6 mb-6">
+                    <span class="text-4xl font-black text-brand-600">${{ total|intcomma }}</span>
+                </div>
+                
+                <div class="mb-8 p-4 bg-white border-2 border-gray-200 rounded-sm">
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1">Payment Method</p>
+                    <p class="font-black text-epic-dark">
+                        {% if payment_method == 'cod' %}Cash on Delivery{% else %}Credit/Debit Card (Test){% endif %}
+                    </p>
+                </div>
+                
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-epic-dark text-white font-black tracking-widest uppercase text-xl px-8 py-5 rounded-sm hover:bg-brand-600 transition-all transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(15,23,42,0.3)]">
+                        Place Order
+                    </button>
+                </form>
+                
+                <a href="{% url 'checkout' %}" class="block w-full text-center bg-white border-2 border-gray-300 text-gray-700 font-black tracking-widest uppercase text-sm px-4 py-3 rounded-sm hover:bg-gray-50 transition-colors">
+                    Edit Details
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

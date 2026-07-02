@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load store_extras humanize %}
+
+{% block title %}Checkout — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+    <!-- Progress bar -->
+    <div class="flex items-center gap-2 mb-10 text-sm font-bold">
+        <span class="bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-black">1</span>
+        <span class="text-gray-900">Shipping</span>
+        <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+        <span class="bg-gray-200 text-gray-400 px-3 py-1 rounded-full text-xs font-black">2</span>
+        <span class="text-gray-400">Payment</span>
+        <div class="flex-1 h-0.5 bg-gray-200 mx-2"></div>
+        <span class="bg-gray-200 text-gray-400 px-3 py-1 rounded-full text-xs font-black">3</span>
+        <span class="text-gray-400">Confirmation</span>
+    </div>
+
+    <div class="mb-8">
+        <h1 class="font-serif font-bold text-3xl text-epic-dark">Shipping Details</h1>
+        <p class="text-gray-500 mt-1">Select your delivery address to continue.</p>
+    </div>
+
+    {% if new_user_coupon_code and new_user_coupon_eligible %}
+    <!-- First-order coupon card -->
+    <div class="mb-8 rounded-2xl border-2 border-dashed border-brand-300 bg-gradient-to-br from-brand-50 to-rose-50 overflow-hidden">
+        <div class="flex flex-col sm:flex-row">
+            <!-- Left stripe -->
+            <div class="bg-brand-600 text-white px-5 py-4 flex flex-col items-center justify-center text-center sm:w-32 shrink-0">
+                <p class="text-3xl font-black leading-none">{{ new_user_coupon_percent }}%</p>
+                <p class="text-xs font-black uppercase tracking-widest text-white/80 mt-1">Off</p>
+            </div>
+            <!-- Right content -->
+            <div class="flex-1 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-widest text-brand-600 mb-1">First-order offer — just for you</p>
+                    <p class="text-epic-dark font-bold text-base leading-snug">
+                        You qualify for <strong>{{ new_user_coupon_percent }}% off</strong> your entire order.
+                    </p>
+                    <p class="text-gray-500 text-sm mt-0.5">Paste the code in the coupon field below to save.</p>
+                </div>
+                <button
+                    type="button"
+                    onclick="
+                        var f=document.querySelector('[name=coupon_code]');
+                        if(f){f.value='{{ new_user_coupon_code }}';f.focus();}
+                        this.textContent='Applied!';
+                        this.classList.add('bg-green-600','border-green-600');
+                        this.classList.remove('bg-brand-600','border-brand-600');
+                        setTimeout(()=>{this.textContent='Apply {{ new_user_coupon_code }}';this.classList.remove('bg-green-600','border-green-600');this.classList.add('bg-brand-600','border-brand-600');},2500);
+                    "
+                    class="bg-brand-600 border-2 border-brand-600 text-white font-black text-sm uppercase tracking-wider px-5 py-2.5 rounded-xl hover:bg-brand-700 transition-colors whitespace-nowrap shrink-0"
+                >
+                    Apply {{ new_user_coupon_code }}
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Form -->
+        <div class="flex-1">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Shipping address -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-gray-900">Shipping Address *</label>
+                            <a href="{% url 'address_create' %}?next={% url 'checkout' %}" class="text-xs font-bold text-brand-600 hover:text-brand-800">+ Add new</a>
+                        </div>
+                        {{ form.shipping_address }}
+                        {% if form.shipping_address.errors %}
+                            <p class="text-red-600 text-xs mt-1 font-medium">{{ form.shipping_address.errors.0 }}</p>
+                        {% endif %}
+                        {% if not form.shipping_address.field.queryset.exists %}
+                            <div class="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
+                                <p class="text-yellow-800 font-bold">No shipping address saved yet.</p>
+                                <a href="{% url 'address_create' %}" class="text-brand-600 font-bold hover:underline">Add a shipping address →</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Billing address -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900 mb-2">Billing Address</label>
+                        {{ form.billing_address }}
+                        <p class="text-xs text-gray-400 mt-1.5">Leave blank to use your shipping address.</p>
+                    </div>
+
+                    <!-- Coupon -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900 mb-2">Coupon Code</label>
+                        {{ form.coupon_code }}
+                        {% if form.coupon_code.errors %}
+                            <p class="text-red-600 text-xs mt-1 font-medium">{{ form.coupon_code.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-900 mb-2">Order Notes</label>
+                        {{ form.notes }}
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-wider px-6 py-4 rounded-xl transition-colors text-sm order-1 sm:order-2">
+                            Continue to Payment →
+                        </button>
+                        <a href="{% url 'cart' %}" class="flex-1 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 font-bold uppercase tracking-wide px-6 py-4 rounded-xl transition-colors text-sm text-center order-2 sm:order-1">
+                            ← Back to Cart
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="lg:w-72 shrink-0">
+            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 sticky top-24">
+                <h2 class="font-serif font-bold text-lg text-epic-dark mb-4">Order ({{ items.count }} item{{ items.count|pluralize }})</h2>
+                <div class="space-y-3 mb-4 divide-y divide-gray-200">
+                    {% for item in items %}
+                        <div class="flex justify-between text-sm pt-3 first:pt-0">
+                            <span class="text-gray-600 line-clamp-1 pr-3">{{ item.quantity }}× {{ item.product.name }}</span>
+                            <span class="font-bold text-gray-900 shrink-0">{{ item.line_total|money }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="border-t border-gray-300 pt-4 flex justify-between">
+                    <span class="font-black text-gray-900">Subtotal</span>
+                    <span class="font-black text-brand-600 text-xl">{{ subtotal|money }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+select, textarea, input[type="text"] {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #111827;
+    background-color: #f9fafb;
+    outline: none;
+}
+select:focus, textarea:focus, input[type="text"]:focus {
+    border-color: #e11d48;
+    box-shadow: 0 0 0 2px rgba(225,29,72,0.15);
+}
+textarea { min-height: 80px; resize: vertical; }
+</style>
+{% endblock %}

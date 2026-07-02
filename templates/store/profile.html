@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load store_extras humanize %}
+
+{% block title %}My Account — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+    <div class="mb-8">
+        <p class="text-brand-600 font-black uppercase tracking-widest text-xs mb-1">Welcome, {{ user.get_full_name|default:user.username }}</p>
+        <h1 class="font-serif font-bold text-4xl text-epic-dark">My Account</h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Addresses (2/3 width) -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="font-bold text-gray-900 text-lg">Saved Addresses</h2>
+                    <a href="{% url 'address_create' %}" class="text-sm font-bold text-brand-600 hover:text-brand-800 transition-colors">+ Add New</a>
+                </div>
+                {% if addresses %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+                        {% for addr in addresses %}
+                        <div class="p-6 relative">
+                            {% if addr.is_default %}
+                                <span class="absolute top-4 right-4 bg-yellow-100 text-yellow-800 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">Default</span>
+                            {% endif %}
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-600">{{ addr.get_type_display }}</span>
+                            </div>
+                            <p class="font-bold text-gray-900 mb-1 text-sm">{{ addr.full_name }}</p>
+                            <div class="text-xs text-gray-500 leading-relaxed space-y-0.5">
+                                <p>{{ addr.street_address }}</p>
+                                <p>{{ addr.city }}{% if addr.state %}, {{ addr.state }}{% endif %} {{ addr.postal_code }}</p>
+                                <p>{{ addr.country }}</p>
+                                {% if addr.phone %}<p class="mt-1">{{ addr.phone }}</p>{% endif %}
+                            </div>
+                            <div class="flex gap-4 mt-4 pt-4 border-t border-gray-100">
+                                <a href="{% url 'address_edit' addr.pk %}" class="text-xs font-bold text-brand-600 hover:text-brand-800 uppercase tracking-wide transition-colors">Edit</a>
+                                <form method="post" action="{% url 'address_delete' addr.pk %}" data-confirm="Remove this address?">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-700 uppercase tracking-wide transition-colors">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-12 text-center">
+                        <div class="flex justify-center mb-4" aria-hidden="true">
+                            <svg class="w-12 h-12 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <p class="text-gray-500 font-medium mb-4">No addresses saved yet.</p>
+                        <a href="{% url 'address_create' %}" class="inline-block bg-brand-600 text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-brand-700 transition-colors">Add Address</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent orders sidebar (1/3 width) -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden sticky top-24">
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="font-bold text-gray-900">Recent Orders</h2>
+                    <a href="{% url 'order_history' %}" class="text-xs font-bold text-brand-600 hover:text-brand-800 uppercase tracking-wide">All →</a>
+                </div>
+                {% if recent_orders %}
+                    <div class="divide-y divide-gray-100">
+                        {% for order in recent_orders %}
+                        <a href="{% url 'order_detail' order.pk %}" class="block px-5 py-4 hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-start gap-2">
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">#{{ order.pk }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">{{ order.created_at|date:"M j, Y" }}</p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="font-black text-sm text-epic-dark">{{ order.total_price|money }}</p>
+                                    <span class="text-[10px] font-black uppercase tracking-wider
+                                        {% if order.status == 'completed' %}text-green-600
+                                        {% elif order.status == 'cancelled' %}text-red-600
+                                        {% elif order.status == 'shipped' %}text-blue-600
+                                        {% else %}text-yellow-600{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-8 text-center">
+                        <p class="text-gray-400 text-sm">No orders yet.</p>
+                        <a href="{% url 'home' %}" class="mt-3 inline-block text-xs font-bold text-brand-600 hover:underline">Start shopping →</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

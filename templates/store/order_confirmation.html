@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load store_extras humanize %}
+
+{% block title %}Order Confirmed #{{ order.pk }} — Epic AI Reads{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+    <!-- Success icon -->
+    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+    </div>
+    <h1 class="font-serif font-bold text-4xl text-epic-dark mb-3">Order Confirmed!</h1>
+    <p class="text-gray-500 text-lg mb-2">Thank you, <strong>{{ order.user.get_full_name|default:order.user.username }}</strong>.</p>
+    <p class="text-gray-400 text-sm mb-10">A confirmation email has been sent to <strong>{{ order.user.email }}</strong>.</p>
+
+    <!-- Order card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm text-left overflow-hidden mb-8">
+        <!-- Header -->
+        <div class="bg-epic-dark text-white px-6 py-4 flex items-center justify-between">
+            <div>
+                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Order Number</p>
+                <p class="font-black text-xl">#{{ order.pk }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Status</p>
+                <span class="bg-yellow-400 text-epic-dark text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full">{{ order.get_status_display }}</span>
+            </div>
+        </div>
+
+        <!-- Payment info -->
+        {% if payment %}
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-gray-900">
+                    {{ payment.get_method_display }}
+                    {% if payment.masked_card %} — {{ payment.masked_card }}{% endif %}
+                    {% if payment.wallet_email %} — {{ payment.wallet_email }}{% endif %}
+                </p>
+                <p class="text-xs text-gray-400 font-mono mt-0.5">Txn: {{ payment.txn_id }}</p>
+            </div>
+            <span class="ml-auto text-xs font-black {% if payment.status == 'paid' %}text-green-600{% else %}text-orange-600{% endif %} uppercase tracking-wider">{{ payment.get_status_display }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Items -->
+        <div class="divide-y divide-gray-100">
+            {% for item in order.items.all %}
+            <div class="flex items-center gap-4 px-6 py-4">
+                <div class="shrink-0 w-10 h-14 bg-gray-100 rounded-lg overflow-hidden">
+                    {% if item.product and item.product.display_image %}
+                        <img src="{{ item.product.display_image }}" alt="" class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-900 text-sm line-clamp-1">{{ item.product_name }}</p>
+                    {% if item.product_author %}<p class="text-xs text-gray-400">{{ item.product_author }}</p>{% endif %}
+                    <p class="text-xs text-gray-400 mt-0.5">Qty: {{ item.quantity }}</p>
+                </div>
+                <p class="font-bold text-gray-900 shrink-0 text-sm">{{ item.line_total|money }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Totals -->
+        <div class="px-6 py-5 bg-gray-50 space-y-2">
+            {% if order.discount_amount %}
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-500">Subtotal</span>
+                    <span class="font-bold">{{ order.subtotal|money }}</span>
+                </div>
+                <div class="flex justify-between text-sm text-green-700">
+                    <span class="font-bold">Discount</span>
+                    <span class="font-bold">−{{ order.discount_amount|money }}</span>
+                </div>
+            {% endif %}
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Shipping</span>
+                <span class="font-bold text-green-600">Free</span>
+            </div>
+            <div class="flex justify-between text-lg border-t border-gray-200 pt-3">
+                <span class="font-black text-gray-900">Total Charged</span>
+                <span class="font-black text-brand-600">{{ order.total_price|money }}</span>
+            </div>
+        </div>
+
+        <!-- Shipping address -->
+        <div class="px-6 py-4 border-t border-gray-100">
+            <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Shipping to</p>
+            <p class="text-sm text-gray-700 font-medium">{{ order.shipping_address }}</p>
+        </div>
+    </div>
+
+    <!-- CTAs -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{% url 'order_history' %}" class="bg-epic-dark text-white font-black uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-gray-800 transition-colors text-sm">
+            View All Orders
+        </a>
+        <a href="{% url 'home' %}" class="bg-white border border-gray-200 text-gray-700 font-bold uppercase tracking-wider px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm">
+            Continue Shopping
+        </a>
+    </div>
+</div>
+{% endblock %}

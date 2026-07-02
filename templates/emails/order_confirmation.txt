@@ -1,0 +1,22 @@
+Epic AI Reads — Order Confirmed
+
+Hi {{ order.user.get_full_name|default:order.user.username }},
+
+Thank you for your order! Here are the details:
+
+Order #{{ order.pk }}
+Placed: {{ order.created_at|date:"F j, Y" }}
+
+ITEMS ORDERED
+{% for item in order.items.all %}
+  {{ item.quantity }}x {{ item.product_name }} — ${{ item.line_total }}
+{% endfor %}
+
+TOTAL: ${{ order.total_price }}
+
+SHIPPING TO:
+{{ order.shipping_address }}
+
+If you have any questions, reply to this email and we'll be happy to help.
+
+— The Epic AI Reads Team
