@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: epic-ai-reads
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn commerce_site.wsgi:application
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: epic-ai-reads-db
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: "4"
+      - key: ALLOWED_HOSTS
+        value: webais.dev,www.webais.dev
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://webais.dev,https://www.webais.dev
+
+databases:
+  - name: epic-ai-reads-db
+    plan: free
